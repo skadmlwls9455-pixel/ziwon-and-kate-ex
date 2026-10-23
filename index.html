@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>서울 하루 코스 추천기</title>
+  <style>
+    body { font-family: sans-serif; max-width: 960px; margin: 0 auto; padding: 16px; }
+    form { display: grid; gap: 12px; margin-bottom: 24px; }
+    fieldset { border: 1px solid #ccc; padding: 8px 12px; }
+    #results { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .card { border: 1px solid #ccc; border-radius: 8px; padding: 12px; }
+    .card h3 { margin: 0 0 8px; }
+    .card ul { padding-left: 18px; }
+  </style>
+</head>
+<body>
+  <h1>서울 하루 코스 추천기</h1>
+
+  <form id="prefs-form">
+    <label>
+      1인 예산(원)
+      <input type="number" id="budget" min="0" step="1000" value="50000" required>
+    </label>
+
+    <fieldset>
+      <legend>원하는 스타일</legend>
+      <label><input type="checkbox" name="mood" value="조용한"> 조용한</label>
+      <label><input type="checkbox" name="mood" value="전통"> 전통</label>
+      <label><input type="checkbox" name="mood" value="활기찬"> 활기찬</label>
+      <label><input type="checkbox" name="mood" value="트렌디"> 트렌디</label>
+      <label><input type="checkbox" name="mood" value="자연"> 자연</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>혼자 가나요?</legend>
+      <label><input type="radio" name="alone" value="yes" checked> 혼자</label>
+      <label><input type="radio" name="alone" value="no"> 함께</label>
+    </fieldset>
+
+    <button type="submit">코스 추천받기</button>
+  </form>
+
+  <section id="results"></section>
+
+  <!-- 의진의 logic.js. 아직 없으면 404가 나지만 ui.js의 가짜 recommend()로 동작한다. -->
+  <script src="logic.js"></script>
+  <script src="ui.js"></script>
+</body>
+</html>
