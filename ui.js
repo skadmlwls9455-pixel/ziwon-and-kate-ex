@@ -48,6 +48,10 @@ function getRecommend() {
   return typeof recommend === "function" ? recommend : fakeRecommend;
 }
 
+function checkedValue(name) {
+  return document.querySelector(`input[name="${name}"]:checked`).value;
+}
+
 function readPrefs() {
   const mood = [...document.querySelectorAll('input[name="mood"]:checked')].map((el) => el.value);
   return {
@@ -56,7 +60,12 @@ function readPrefs() {
     mood,
     spicyOk: false,
     // 약속(CLAUDE.md)에는 없는 추가 필드. logic.js가 쓰려면 의진과 합의 필요.
-    companion: document.querySelector('input[name="companion"]:checked').value
+    companion: checkedValue("companion"),
+    style: {
+      walk: checkedValue("walk"),
+      stay: checkedValue("stay"),
+      crowd: checkedValue("crowd")
+    }
   };
 }
 
