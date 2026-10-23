@@ -165,6 +165,92 @@ function renderResults(courses) {
   }
 }
 
+// 자연어 → 폼 값. 외부 API 없이 키워드로만 찾는다. 위에 있는 규칙이 먼저 이긴다.
+// ("여자친구"에 "친구"가 들어 있어서 데이트를 친구보다 먼저 검사한다.)
+const NL_RULES = {
+  companion: [
+    [/부모님|엄마|아빠|어머니|아버지|효도/, "부모님"],
+    [/데이트|여자친구|남자친구|여친|남친|애인|연인/, "데이트"],
+    [/친구/, "친구"],
+    [/혼자|나홀로/, "혼자"]
+  ],
+  walk: [
+    [/적게 걷|덜 걷|걷기 힘|많이 못 걷|다리 아프|무릎/, "적게"],
+    [/걷|산책/, "많이"]
+  ],
+  stay: [
+    [/오래 앉|대화|수다/, "오래 앉아 대화"],
+    [/여러 곳|구경|돌아다니|둘러/, "여러 곳 둘러보기"]
+  ],
+  crowd: [
+    [/조용|한적|붐비지|사람 없|사람 적/, "한적한"]
+  ]
+};
+
+const NL_MOOD_RULES = [
+  [/조용|한적/, "조용한"],
+  [/전통|한옥|고궁/, "전통"],
+  [/활기|신나/, "활기찬"],
+  [/트렌디|힙|핫플/, "트렌디"],
+  [/자연|공원|한강|숲/, "자연"]
+];
+
+function parseBudget(text) {
+  const man = text.match(/(\d+(?:\.\d+)?)\s*만\s*(?:(\d+)\s*천)?/);
+  if (man) return Math.round(Number(man[1]) * 10000 + Number(man[2] || 0) * 1000);
+  const won = text.match(/(\d[\d,]*)\s*원/);
+  if (won) return Number(won[1].replace(/,/g, ""));
+  return null;
+}
+
+function parseNaturalLanguage(text) {
+  const found = {};
+  for (const [field, rules] of Object.entries(NL_RULES)) {
+    const hit = rules.find(([re]) => re.test(text));
+    if (hit) found[field] = hit[1];
+  }
+  const mood = NL_MOOD_RULES.filter(([re]) => re.test(text)).map(([, value]) => value);
+  if (mood.length > 0) found.mood = mood;
+  const budget = parseBudget(text);
+  if (budget !== null) found.budget = budget;
+  return found;
+}
+
+function applyToForm(found) {
+  for (const field of ["companion", "walk", "stay", "crowd"]) {
+    if (found[field]) {
+      document.querySelector(`input[name="${field}"][value="${found[field]}"]`).checked = true;
+    }
+  }
+  if (found.mood) {
+    for (const box of document.querySelectorAll('input[name="mood"]')) {
+      box.checked = found.mood.includes(box.value);
+    }
+  }
+  if (found.budget !== undefined) {
+    document.getElementById("budget").value = found.budget;
+  }
+}
+
+function describeFound(found) {
+  const parts = [];
+  if (found.companion) parts.push(found.companion);
+  if (found.walk) parts.push(`걷기 ${found.walk}`);
+  if (found.stay) parts.push(found.stay);
+  if (found.crowd) parts.push(found.crowd);
+  if (found.mood) parts.push(`분위기 ${found.mood.join("·")}`);
+  if (found.budget !== undefined) parts.push(`예산 ${formatWon(found.budget)}`);
+  return parts.length > 0
+    ? `인식됨: ${parts.join(", ")} — 아래 항목을 확인하고 추천받기를 눌러주세요.`
+    : "알아들은 항목이 없어요. 아래에서 직접 골라주세요.";
+}
+
+document.getElementById("nl-apply").addEventListener("click", () => {
+  const found = parseNaturalLanguage(document.getElementById("nl-input").value);
+  applyToForm(found);
+  document.getElementById("nl-result").textContent = describeFound(found);
+});
+
 document.getElementById("prefs-form").addEventListener("submit", (event) => {
   event.preventDefault();
   const courses = getRecommend()(readPrefs());
