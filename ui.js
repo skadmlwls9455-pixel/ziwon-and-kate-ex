@@ -56,7 +56,7 @@ function readPrefs() {
     mood,
     spicyOk: false,
     // 약속(CLAUDE.md)에는 없는 추가 필드. logic.js가 쓰려면 의진과 합의 필요.
-    alone: document.querySelector('input[name="alone"]:checked').value === "yes"
+    companion: document.querySelector('input[name="companion"]:checked').value
   };
 }
 
